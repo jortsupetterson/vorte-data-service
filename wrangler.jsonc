@@ -4,44 +4,43 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "vorte-data-service",
+	"account_id": "e8ef5da3c57b544081f2e4181d6cecc9",
+	"name": "data-service-v0",
 	"main": "src/index.js",
 	"compatibility_date": "2025-07-31",
 	"observability": {
 		"enabled": true
-	}
-	/**
-	 * Smart Placement
-	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": { "mode": "smart" },
+	},
 
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
+	"placement": { "mode": "smart" },
 
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 */
-	// "vars": { "MY_VARIABLE": "production_value" },
-	/**
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
+	"minify": true,
 
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": { "directory": "./public/", "binding": "ASSETS" },
+	"kv_namespaces": [
+		{
+			"binding": "AUTHN_KV",
+			"id": "16b7f10d0c794ddcb0793305f80107df",
+			"preview_id": "3c74d70e263b4de9a7c97399266a66f3"
+		}
+	],
 
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+	"d1_databases": [
+		{
+			"binding": "AUTHN_D1",
+			"database_id": "6ab5fb72-4fd7-45df-a8e3-c83407ca9e4f",
+			"preview_database_id": "9c43b0f2-7673-45b6-847b-a0bb408cd6ff"
+		}
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "AUTHN_ALIAS_SALT",
+			"secret_name": "authn-alias-salt",
+			"store_id": "44ad49dd09074b15a7db7007f7de65f6"
+		},
+		{
+			"binding": "D1_API_KEY",
+			"secret_name": "d1-api-key",
+			"store_id": "44ad49dd09074b15a7db7007f7de65f6"
+		}
+	]
 }
