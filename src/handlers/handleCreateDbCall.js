@@ -17,7 +17,10 @@ async function getDbNameFromUserId(env, user_email) {
 export async function handleCreateDbCall(url, env, form, cookies) {
 	const [apiKey, user_id] = await Promise.all([env.D1_API_KEY.get(), getDbNameFromUserId(env, form.email)]);
 
-	if (!user_id) return 409;
+	if (!user_id)
+		return JSON.stringify({
+			status: 409,
+		});
 
 	const createDbRequest = await fetch(url, {
 		method: 'POST',
@@ -67,7 +70,7 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 				form.lastname,
 				form.email,
 				JSON.stringify(['welcome', 'passkey', 'interface', 'first-business-plan']),
-				JSON.stringify({ theme: 'dark', contrast: 'normal' }),
+				JSON.stringify({ theme: cookies.theme || 'dark', contrast: cookies.contrast || 'normal', lang: cookies.lang || 'fi' }),
 				user_id,
 				user_id,
 			],
@@ -78,5 +81,8 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 		throw new Error('D1 profile table creation failed (insert): ' + JSON.stringify(createProfileTableResponse));
 	}
 
-	return 201;
+	return JSON.stringify({
+		status: 201,
+		result: user_id,
+	});
 }

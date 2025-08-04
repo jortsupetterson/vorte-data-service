@@ -6,6 +6,10 @@ export class VorteDataService extends WorkerEntrypoint {
 	async createDb(form, cookies) {
 		return await handleCreateDbCall(API_BASE, this.env, form, cookies);
 	}
+
+	async getProfile(user_id) {
+		return handleGetProfileCall(user_id, this.env, this.ctx);
+	}
 }
 
 export default {
