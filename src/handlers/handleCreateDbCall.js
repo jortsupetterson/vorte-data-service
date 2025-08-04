@@ -1,6 +1,8 @@
 import inserNewUUIDwithEmailAlias from './SQL/insertNewUUIDwithEmailAlias.js';
 import createProfileTableForNewUserDatabase from './SQL/createProfileTableForNewUserDatabase.js';
+import insertProfileForNewUserDatabase from './SQL/insertProfileForNewUserDatabase.js';
 import deriveUserIdAlias from './utilities/deriveAlias.js';
+
 async function getDbNameFromUserId(env, user_email) {
 	const alias = await deriveUserIdAlias('email', user_email, await env.AUTHN_ALIAS_SALT.get());
 	let user_id, res;
@@ -16,6 +18,7 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 	const [apiKey, user_id] = await Promise.all([env.D1_API_KEY.get(), getDbNameFromUserId(env, form.email)]);
 
 	if (!user_id) return 409;
+
 	const createDbRequest = await fetch(url, {
 		method: 'POST',
 		headers: {
@@ -33,33 +36,48 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 		throw new Error('D1 database creation failed: ' + JSON.stringify(createDbResponse));
 	}
 
-	const createProfileTableRequest = await fetch(`${url}/${encodeURIComponent(user_id)}/query`, {
+	const dbId = createDbResponse.result.uuid;
+
+	// 1. CREATE TABLE
+	const createTableResp = await fetch(`${url}/${encodeURIComponent(dbId)}/query`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			createProfileTableForNewUserDatabase,
+			sql: createProfileTableForNewUserDatabase,
+		}),
+	});
+	const createTableJson = await createTableResp.json();
+	if (!createTableJson.success) {
+		throw new Error('D1 profile table creation failed (create table): ' + JSON.stringify(createTableJson));
+	}
+
+	// 2. INSERT row
+	const profileInsertResponse = await fetch(`${url}/${encodeURIComponent(dbId)}/query`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			sql: insertProfileForNewUserDatabase,
 			parameters: [
 				user_id,
 				form.firstname,
 				form.lastname,
 				form.email,
-				['authn', 'theme'],
-				{
-					theme: 'dark',
-					contrast: 'normal',
-				},
+				JSON.stringify(['authn', 'theme']),
+				JSON.stringify({ theme: 'dark', contrast: 'normal' }),
 				user_id,
 				user_id,
 			],
 		}),
 	});
-
-	const createProfileTableResponse = await createProfileTableRequest.json();
+	const createProfileTableResponse = await profileInsertResponse.json();
 	if (!createProfileTableResponse.success) {
-		throw new Error('D1 database creation failed: ' + JSON.stringify(createDbResponse));
+		throw new Error('D1 profile table creation failed (insert): ' + JSON.stringify(createProfileTableResponse));
 	}
 
 	return 201;

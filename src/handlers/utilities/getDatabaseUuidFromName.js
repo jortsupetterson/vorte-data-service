@@ -1,0 +1,1 @@
+GET /accounts/{account_id}/d1/database?name=<nimi></nimi>
