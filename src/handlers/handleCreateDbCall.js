@@ -38,7 +38,6 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 
 	const dbId = createDbResponse.result.uuid;
 
-	// 1. CREATE TABLE
 	const createTableResp = await fetch(`${url}/${encodeURIComponent(dbId)}/query`, {
 		method: 'POST',
 		headers: {
@@ -54,7 +53,6 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 		throw new Error('D1 profile table creation failed (create table): ' + JSON.stringify(createTableJson));
 	}
 
-	// 2. INSERT row
 	const profileInsertResponse = await fetch(`${url}/${encodeURIComponent(dbId)}/query`, {
 		method: 'POST',
 		headers: {
@@ -63,12 +61,12 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 		},
 		body: JSON.stringify({
 			sql: insertProfileForNewUserDatabase,
-			parameters: [
+			params: [
 				user_id,
 				form.firstname,
 				form.lastname,
 				form.email,
-				JSON.stringify(['authn', 'theme']),
+				JSON.stringify(['welcome', 'passkey', 'interface', 'first-business-plan']),
 				JSON.stringify({ theme: 'dark', contrast: 'normal' }),
 				user_id,
 				user_id,
