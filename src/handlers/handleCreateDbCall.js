@@ -6,7 +6,7 @@ import deriveUserIdAlias from './utilities/deriveAlias.js';
 async function getDbNameFromUserId(env, user_email) {
 	const alias = await deriveUserIdAlias('email', user_email, await env.AUTHN_ALIAS_SALT.get());
 	let user_id, res;
-	user_id = crypto.randomUUID();
+	user_id = `user:${crypto.randomUUID()}`;
 	res = await env.AUTHN_D1.prepare(inserNewUUIDwithEmailAlias).bind(user_id, alias, 'email').run();
 	if (res.meta.changes === 0) return null;
 
@@ -14,7 +14,7 @@ async function getDbNameFromUserId(env, user_email) {
 	return user_id;
 }
 
-export async function handleCreateDbCall(url, env, form, cookies) {
+export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 	const [apiKey, user_id] = await Promise.all([env.D1_API_KEY.get(), getDbNameFromUserId(env, form.email)]);
 
 	if (!user_id)
@@ -70,7 +70,17 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 				form.lastname,
 				form.email,
 				JSON.stringify(['welcome', 'passkey', 'interface', 'first-business-plan']),
-				JSON.stringify({ theme: cookies.theme || 'dark', contrast: cookies.contrast || 'normal', lang: cookies.lang || 'fi' }),
+				JSON.stringify({
+					theme: cookies.theme || 'dark',
+					contrast: cookies.contrast || 'normal',
+					colors: {
+						primary: cookies.primary || '#0b4f60',
+						secondary: cookies.secondary || '#199473',
+						primart_ghost: cookies.primary_ghost || 'rgba(11, 79, 96, 0.6)',
+						secondary_ghost: cookies.secondary_ghost || 'rgba(25, 148, 115, 0.6)',
+					},
+					lang: cookies.lang || lang,
+				}),
 				user_id,
 				user_id,
 			],
@@ -80,6 +90,8 @@ export async function handleCreateDbCall(url, env, form, cookies) {
 	if (!createProfileTableResponse.success) {
 		throw new Error('D1 profile table creation failed (insert): ' + JSON.stringify(createProfileTableResponse));
 	}
+
+	ctx.waitUntil(env.PROFILES_KV.put(user_id, createProfileTableResponse.result, { expirationTtl: 2_592_000 }));
 
 	return JSON.stringify({
 		status: 201,

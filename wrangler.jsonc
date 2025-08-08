@@ -21,6 +21,11 @@
 			"binding": "AUTHN_KV",
 			"id": "16b7f10d0c794ddcb0793305f80107df",
 			"preview_id": "3c74d70e263b4de9a7c97399266a66f3"
+		},
+		{
+			"binding": "PROFILES_KV",
+			"id": "41b27fa773a740978820fc3ef9bda803",
+			"preview_id": "53ecd1504ae34195921016636f5c18a2"
 		}
 	],
 

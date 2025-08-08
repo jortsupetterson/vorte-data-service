@@ -1,7 +1,8 @@
 import { getDatabaseUuidFromName } from './utilities/getDatabaseUuidFromName.js';
 
 export async function handleGetProfileCall(user_id, env, ctx) {
-	const [url, apiKey] = await Promise.all([getDatabaseUuidFromName(user_id, env, ctx), env.D1_API_KEY.get()]);
+	const apiKey = await env.D1_API_KEY.get();
+	const url = await getDatabaseUuidFromName(user_id, ctx, apiKey);
 
 	const getProfileRequest = await fetch(url, {
 		method: 'POST',
@@ -17,8 +18,12 @@ export async function handleGetProfileCall(user_id, env, ctx) {
 	});
 
 	const getProfileResponse = await getProfileRequest.json();
-
+	const content = JSON.stringify(getProfileResponse);
 	if (!getProfileResponse.success) {
-		throw new Error('D1 profile table read failed (SELECT ALL): ' + JSON.stringify(getProfileResponse));
+		throw new Error('D1 profile table read failed (SELECT ALL): ' + content);
 	}
+
+	ctx.waitUntil(env.PROFILES_KV.put(user_id, content, { expirationTtl: 2_592_000 }));
+
+	return content;
 }
