@@ -15,7 +15,7 @@ export class VorteDataService extends WorkerEntrypoint {
 
 	//Others
 	async getDashboard(user_id) {
-		return await nhandleGetProfileCall(user_id, this.env, this.ctx);
+		return await handleGetProfileCall(user_id, this.env, this.ctx);
 	}
 
 	async createDb(form, cookies, lang) {
