@@ -4,7 +4,7 @@ import insertProfileForNewUserDatabase from './SQL/insertProfileForNewUserDataba
 import deriveUserIdAlias from './utilities/deriveAlias.js';
 
 async function getDbNameFromUserId(env, user_email) {
-	const alias = await deriveUserIdAlias('email', user_email, await env.AUTHN_ALIAS_SALT.get());
+	const alias = await deriveUserIdAlias('email', user_email, await env.ALIAS_SECRET.get());
 	let user_id, res;
 	user_id = `user:${crypto.randomUUID()}`;
 	res = await env.AUTHN_D1.prepare(inserNewUUIDwithEmailAlias).bind(user_id, alias, 'email').run();
@@ -90,11 +90,13 @@ export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 	if (!createProfileTableResponse.success) {
 		throw new Error('D1 profile table creation failed (insert): ' + JSON.stringify(createProfileTableResponse));
 	}
+	n;
 
 	ctx.waitUntil(env.PROFILES_KV.put(user_id, createProfileTableResponse.result, { expirationTtl: 2_592_000 }));
 
 	return JSON.stringify({
 		status: 201,
-		result: user_id,
+		headers: {},
+		body: user_id,
 	});
 }

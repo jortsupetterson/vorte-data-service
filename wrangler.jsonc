@@ -38,8 +38,8 @@
 	],
 	"secrets_store_secrets": [
 		{
-			"binding": "AUTHN_ALIAS_SALT",
-			"secret_name": "authn-alias-salt",
+			"binding": "ALIAS_SECRET",
+			"secret_name": "static-alias-secret",
 			"store_id": "44ad49dd09074b15a7db7007f7de65f6"
 		},
 		{
