@@ -1,6 +1,6 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
 import { handleCreateDbCall } from './handlers/handleCreateDbCall.js';
-import { handleGetProfileCall } from './handlers/handleGetProfileCall.js';
+import { handleGetDashboardContentCall } from './handlers/handleGetDashboardContentCall.js';
 const API_BASE = 'https://api.cloudflare.com/client/v4/accounts/e8ef5da3c57b544081f2e4181d6cecc9/d1/database';
 
 export class VorteDataService extends WorkerEntrypoint {
@@ -14,8 +14,8 @@ export class VorteDataService extends WorkerEntrypoint {
 	async deleteData() {}
 
 	//Others
-	async getDashboard(user_id) {
-		return await handleGetProfileCall(user_id, this.env, this.ctx);
+	async getDashboardContent(authorization, lang) {
+		return await handleGetDashboardContentCall(this.env, this.ctx, authorization, lang);
 	}
 
 	async createDb(form, cookies, lang) {
