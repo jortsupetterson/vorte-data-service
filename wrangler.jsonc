@@ -6,15 +6,15 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"account_id": "e8ef5da3c57b544081f2e4181d6cecc9",
 	"name": "data-service-v0",
-	"main": "src/index.js",
-	"compatibility_date": "2025-07-31",
+	"main": "dist/index.js",
+	"compatibility_date": "2025-08-12",
 	"observability": {
 		"enabled": true
 	},
 
 	"placement": { "mode": "smart" },
 
-	"minify": false,
+	"minify": true,
 
 	"kv_namespaces": [
 		{
@@ -41,9 +41,19 @@
 			"binding": "D1_API_KEY",
 			"secret_name": "d1-api-key",
 			"store_id": "44ad49dd09074b15a7db7007f7de65f6"
+		},
+		{
+			"binding": "VORTE_SERVER_SECRET",
+			"secret_name": "vorte-server-secret",
+			"store_id": "44ad49dd09074b15a7db7007f7de65f6"
 		}
 	],
 	"services": [
+		{
+			"binding": "AUTHN_SERVICE",
+			"service": "authentication-service-v0",
+			"entrypoint": "VorteAuthenticationService"
+		},
 		{
 			"binding": "CRYPTO_SERVICE",
 			"service": "crypto-service-v0",

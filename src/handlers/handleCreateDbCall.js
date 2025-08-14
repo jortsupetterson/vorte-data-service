@@ -6,7 +6,7 @@ import deriveUserIdAlias from './utilities/deriveAlias.js';
 async function getDbNameFromUserId(env, ctx, user_email) {
 	const alias = await deriveUserIdAlias('email', user_email, await env.ALIAS_SECRET.get());
 	let user_id, res;
-	user_id = `user:${crypto.randomUUID()}`;
+	user_id = `user-${crypto.randomUUID()}`;
 	res = await env.AUTHN_D1.prepare(inserNewUUIDwithEmailAlias).bind(user_id, alias, 'email').run();
 	if (res.meta.changes === 0) return null;
 
@@ -18,7 +18,6 @@ export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 	try {
 		const [apiKey, user_id] = await Promise.all([env.D1_API_KEY.get(), getDbNameFromUserId(env, ctx, form.email)]);
 
-		// duplikaatti → ei heitetä poikkeusta, palautetaan 409
 		if (!user_id) {
 			return {
 				status: 409,
@@ -29,7 +28,6 @@ export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 			};
 		}
 
-		// luo D1 database
 		const createDbRequest = await fetch(url, {
 			method: 'POST',
 			headers: {
@@ -49,7 +47,6 @@ export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 
 		const dbId = createDbResponse.result.uuid;
 
-		// luo profiilitaulu
 		const createTableResp = await fetch(`${url}/${encodeURIComponent(dbId)}/query`, {
 			method: 'POST',
 			headers: {
@@ -84,10 +81,10 @@ export async function handleCreateDbCall(url, env, ctx, form, cookies, lang) {
 						theme: cookies.theme || 'dark',
 						contrast: cookies.contrast || 'normal',
 						colors: {
-							primary: cookies.primary || '#0b4f60',
-							secondary: cookies.secondary || '#199473',
-							primart_ghost: cookies.primary_ghost || 'rgba(11, 79, 96, 0.6)',
-							secondary_ghost: cookies.secondary_ghost || 'rgba(25, 148, 115, 0.6)',
+							c1: cookies.c1 || '#0b4f60',
+							c2: cookies.c2 || '#199473',
+							c3: cookies.c3 || '#C75858',
+							c4: cookies.c4 || '#196129',
 						},
 						lang: cookies.lang || lang,
 					}),

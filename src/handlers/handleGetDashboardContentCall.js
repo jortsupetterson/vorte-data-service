@@ -1,10 +1,6 @@
-import { getDatabaseUuidFromName } from './utilities/getDatabaseUuidFromName.js';
 import widgetMap from './components/widgetMap.js';
 
-export async function handleGetDashboardContentCall(env, ctx, authorization, lang) {
-	const [apiKey, decryptedAuthorization] = await Promise.all([env.D1_API_KEY.get(), env.CRYPTO_SERVICE.decryptPayload(authorization)]);
-
-	const url = await getDatabaseUuidFromName(decryptedAuthorization.plainText, ctx, apiKey);
+export async function handleGetDashboardContentCall(env, ctx, apiKey, lang, url) {
 	//const cacheKey = new Request(`${url}?dashboard`);
 
 	//const cached = await caches.default.match(cacheKey);
